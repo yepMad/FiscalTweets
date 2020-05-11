@@ -1,24 +1,38 @@
-import fetch from 'node-fetch';
+import 'dotenv/config';
 
-import app from './app';
+import fetch from 'node-fetch';
 
 import Twit from './lib/twit';
 import DiscordEmbed from './lib/discordEmbed';
 
 const stream = Twit.stream('statuses/filter', {
-  follow: '1094631187123978244, 600560443, 2226676800, 818269355771383808', // ID's to monitore tweets.
+  follow:
+    '1094631187123978244, 600560443, 2226676800, 818269355771383808, 972826078686384130', // ID's to monitore tweets.
 });
 
 stream.on('tweet', (data) => {
-  const { id_str, text, user } = data;
+  const { id_str, text, user, extended_entities } = data;
   const { name, screen_name, profile_image_url_https } = user;
+  const { media } = extended_entities;
 
-  const embed = DiscordEmbed({
+  const embeds = [];
+
+  const discordEmbed = DiscordEmbed({
     name,
     profile_image_url_https,
     screen_name,
     id_str,
     text,
+  });
+
+  embeds.push(discordEmbed);
+
+  media.forEach((link) => {
+    embeds.push({
+      image: {
+        url: link.media_url_https,
+      },
+    });
   });
 
   fetch(process.env.WEBHOOK, {
@@ -27,11 +41,7 @@ stream.on('tweet', (data) => {
       'content-type': 'application/json',
     },
     body: JSON.stringify({
-      embeds: [embed],
+      embeds,
     }),
   });
-});
-
-app.listen(process.env.PORT || 5000, () => {
-  console.log('Server online');
 });
