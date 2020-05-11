@@ -1,6 +1,6 @@
-import 'dotenv/config';
-
 import fetch from 'node-fetch';
+
+import app from './app';
 
 import Twit from './lib/twit';
 import DiscordEmbed from './lib/discordEmbed';
@@ -30,4 +30,8 @@ stream.on('tweet', (data) => {
       embeds: [embed],
     }),
   });
+});
+
+app.listen(process.env.PORT || 5000, () => {
+  console.log('Server online');
 });
