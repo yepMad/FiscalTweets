@@ -1,0 +1,8 @@
+#production
+dist
+
+#libs
+node_modules
+
+#env
+.env
